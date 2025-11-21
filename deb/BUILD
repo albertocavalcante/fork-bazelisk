@@ -1,6 +1,7 @@
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load(":rpmpack.bzl", "rpmpack_rpm")
 
 config_setting(
     name = "stamp_detect",
@@ -82,40 +83,20 @@ pkg_mklink(
 ]
 
 [
-    genrule(
+    rpmpack_rpm(
         name = "bazelisk-{}_rpm".format(arch),
-        srcs = [
-            ":bazelisk-{}_tar".format(arch),
-            ":description.txt",
-            ":version.txt",
-        ],
-        # rpmpack avoids the rpmbuild dependency noted in https://github.com/bazelbuild/rules_pkg/issues/29.
-        outs = ["bazelisk-{}.rpm".format(RPM_ARCHES[arch])],
-        cmd = """
-set -euo pipefail
-VERSION="$$(cat $(location :version.txt))"
-DESCRIPTION="$$(cat $(location :description.txt))"
-REQS=(--requires ca-certificates)
-$(location @rpmpack//cmd/tar2rpm) \
-  --name bazelisk \
-  --version "$$VERSION" \
-  --release 1 \
-  --arch {rpm_arch} \
-  --summary "A user-friendly launcher for Bazel" \
-  --description "$$DESCRIPTION" \
-  --packager "The Bazel Authors <bazel-dev@googlegroups.com>" \
-  --licence "Apache-2.0" \
-  --url "https://github.com/bazelbuild/bazelisk" \
-  $${{REQS[@]}} \
-  --file "$@" \
-  $(location :bazelisk-{arch}_tar)
-""".format(
-            arch = arch,
-            rpm_arch = RPM_ARCHES[arch],
-        ),
-        # rpmpack avoids rpmbuild dependency (see https://github.com/bazelbuild/rules_pkg/issues/29)
-        tags = ["rpmpack"],
-        tools = ["@rpmpack//cmd/tar2rpm"],
+        out = "bazelisk-{}.rpm".format(RPM_ARCHES[arch]),
+        arch = RPM_ARCHES[arch],
+        data = ":bazelisk-{}_tar".format(arch),
+        description_file = ":description.txt",
+        license = "Apache-2.0",
+        packager = "The Bazel Authors <bazel-dev@googlegroups.com>",
+        pkg_name = "bazelisk",
+        release = "1",
+        requires = ["ca-certificates"],
+        summary = "A user-friendly launcher for Bazel",
+        url = "https://github.com/bazelbuild/bazelisk",
+        version = "$$(cat $(location :version.txt))",
         visibility = ["//visibility:public"],
     )
     for arch in ARCHES
