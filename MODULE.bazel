@@ -17,6 +17,13 @@ bazel_dep(name = "rpmpack", version = "0.6.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.19.4", repo_name = None)
 bazel_dep(name = "rules_nodejs", version = "6.4.0", repo_name = None)
 
+single_version_override(
+    module_name = "rpmpack",
+    patch_strip = 0,
+    patches = ["//deb:rpmpack_def.patch"],
+    version = "0.6.0",
+)
+
 go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.24.0")
 

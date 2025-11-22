@@ -31,8 +31,8 @@ go build
     //:bazelisk-windows-arm64 \
     //deb:bazelisk-amd64_deb \
     //deb:bazelisk-arm64_deb \
-    //deb:bazelisk-amd64_rpm \
-    //deb:bazelisk-arm64_rpm
+    //deb:bazelisk-x86_64 \
+    //deb:bazelisk-aarch64
 echo
 
 cp bazel-out/*-opt*/bin/bazelisk-darwin_amd64 bin/bazelisk-darwin-amd64

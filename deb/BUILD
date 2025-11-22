@@ -1,6 +1,6 @@
+load("@rpmpack//:def.bzl", "pkg_tar2rpm")
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
-load(":rpmpack.bzl", "rpmpack_rpm")
 
 config_setting(
     name = "stamp_detect",
@@ -65,9 +65,8 @@ RPM_ARCHES = {
 ]
 
 [
-    rpmpack_rpm(
-        name = "bazelisk-{}_rpm".format(arch),
-        out = "bazelisk-{}.rpm".format(RPM_ARCHES[arch]),
+    pkg_tar2rpm(
+        name = "bazelisk-{}".format(RPM_ARCHES[arch]),
         arch = RPM_ARCHES[arch],
         data = ":bazelisk-{}_tar".format(arch),
         description_file = ":description.txt",
@@ -78,7 +77,16 @@ RPM_ARCHES = {
         requires = ["ca-certificates"],
         summary = "A user-friendly launcher for Bazel",
         url = "https://github.com/bazelbuild/bazelisk",
-        version = "$$(cat $(location :version.txt))",
+        version_file = ":version.txt",
+        visibility = ["//visibility:public"],
+    )
+    for arch in ARCHES
+]
+
+[
+    filegroup(
+        name = "bazelisk-{}_rpm".format(RPM_ARCHES[arch]),
+        srcs = [":bazelisk-{}".format(RPM_ARCHES[arch])],
         visibility = ["//visibility:public"],
     )
     for arch in ARCHES
