@@ -1,5 +1,4 @@
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
-load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files", "pkg_mklink")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load(":rpmpack.bzl", "rpmpack_rpm")
 
@@ -38,23 +37,6 @@ RPM_ARCHES = {
         remap_paths = {"bazelisk-linux_{}".format(arch): "bazelisk"},
         stamp = -1,
         symlinks = {"bazel": "bazelisk"},
-    )
-    for arch in ARCHES
-]
-
-pkg_mklink(
-    name = "bazel_symlink",
-    link_name = "/usr/bin/bazel",
-    target = "bazelisk",
-)
-
-[
-    pkg_files(
-        name = "bazelisk-{}_files".format(arch),
-        srcs = ["//:bazelisk-linux-{}".format(arch)],
-        attributes = pkg_attributes(mode = "0755"),
-        prefix = "/usr/bin",
-        renames = {"//:bazelisk-linux-{}".format(arch): "bazelisk"},
     )
     for arch in ARCHES
 ]
