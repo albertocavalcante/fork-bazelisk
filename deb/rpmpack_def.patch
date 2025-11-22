@@ -1,0 +1,46 @@
+--- def.bzl
++++ def.bzl
+@@ -2,11 +2,25 @@
+     files = [ctx.file.data]
+     args = ctx.actions.args()
+     args.add("--name", ctx.attr.pkg_name)
+-    args.add("--version", ctx.attr.version)
++    if ctx.file.version_file:
++        args.add("--version", ctx.file.version_file)
++        files.append(ctx.file.version_file)
++    else:
++        args.add("--version", ctx.attr.version)
+     args.add("--release", ctx.attr.release)
+     args.add("--arch", ctx.attr.arch)
++    if ctx.attr.summary:
++        args.add("--summary", ctx.attr.summary)
++    if ctx.attr.license:
++        args.add("--licence", ctx.attr.license)
++    if ctx.attr.url:
++        args.add("--url", ctx.attr.url)
+     args.add("--packager", ctx.attr.packager)
+-    args.add("--epoch", ctx.attr.epoch)
++    if ctx.file.description_file:
++        args.add("--description", ctx.file.description_file)
++        files.append(ctx.file.description_file)
++    if ctx.attr.epoch != None:
++        args.add("--epoch", ctx.attr.epoch)
+     args.add("--prein", ctx.attr.prein)
+     args.add("--postin", ctx.attr.postin)
+     args.add("--preun", ctx.attr.preun)
+@@ -36,9 +50,14 @@
+     attrs = {
+         "data": attr.label(mandatory = True, allow_single_file = [".tar"]),
+         "pkg_name": attr.string(mandatory = True),
+-        "version": attr.string(mandatory = True),
++        "version": attr.string(),
++        "version_file": attr.label(allow_single_file = True, doc = "File containing version string."),
+         "release": attr.string(),
+         "arch": attr.string(),
++        "summary": attr.string(doc = "RPM summary."),
++        "license": attr.string(doc = "License string passed to rpmpack --licence."),
++        "url": attr.string(doc = "Project URL.", default = ""),
++        "description_file": attr.label(allow_single_file = True, doc = "Description text file."),
+         "packager": attr.string(),
+         "epoch": attr.int(),
+         "prein": attr.string(),
